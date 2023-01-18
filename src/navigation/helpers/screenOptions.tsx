@@ -5,7 +5,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Theme } from "src/utils/theme";
 import IconButton from "src/components/IconButton/IconButton";
 import { RouteProp } from "@react-navigation/native";
-import { ManageExpenseScreenProp, RootBottomTabParamList } from "src/types";
+import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import {
+  ManageExpenseScreenProp,
+  RootBottomTabParamList,
+  RootStackParamList,
+} from "src/types";
 
 export const bottomTabScreenOptions:
   | BottomTabNavigationOptions
@@ -28,12 +33,22 @@ export const bottomTabScreenOptions:
         size={24}
         color={tintColor}
         onPress={() => {
-          navigation.navigate("ManageExpense", {});
+          navigation.navigate("ManageExpense", { type: "add" });
         }}
       />
     );
   },
 });
+
+export const stackScreenOption:
+  | NativeStackNavigationOptions
+  | ((props: {
+      route: RouteProp<RootStackParamList, keyof RootStackParamList>;
+      navigation: any;
+    }) => NativeStackNavigationOptions) = {
+  headerStyle: { backgroundColor: Theme.colors.primary500 },
+  headerTintColor: "white",
+};
 
 export const recentExpensesScreenOptions: BottomTabNavigationOptions = {
   title: "Recent Expenses",
@@ -49,4 +64,8 @@ export const allExpencesScreenOptions: BottomTabNavigationOptions = {
   tabBarIcon: ({ color, size, focused }) => (
     <Ionicons name="calendar" size={size} color={color} />
   ),
+};
+
+export const manageExpensesScreenOptions: NativeStackNavigationOptions = {
+  presentation: "modal",
 };

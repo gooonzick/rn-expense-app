@@ -36,7 +36,10 @@ const ExpensesOverview = () => {
 const Navigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="ExpensesOverview">
+      <Stack.Navigator
+        initialRouteName="ExpensesOverview"
+        screenOptions={options.stackScreenOption}
+      >
         <Stack.Screen
           name="ExpensesOverview"
           component={ExpensesOverview}
@@ -45,7 +48,7 @@ const Navigation = () => {
         <Stack.Screen
           name="ManageExpense"
           component={ManageExpenses}
-          options={{ presentation: "modal" }}
+          options={options.manageExpensesScreenOptions}
         />
       </Stack.Navigator>
     </NavigationContainer>

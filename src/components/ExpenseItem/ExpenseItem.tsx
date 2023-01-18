@@ -15,7 +15,7 @@ const ExpenseItem = ({ id, amount, date, description }: Props) => {
   const navigation = useNavigation<ManageExpenseScreenProp>();
 
   const onItemPress = useCallback(() => {
-    navigation.navigate("ManageExpense", { expenseId: id });
+    navigation.navigate("ManageExpense", { expenseId: id, type: "edit" });
   }, []);
 
   return (
