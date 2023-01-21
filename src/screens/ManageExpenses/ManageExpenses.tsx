@@ -1,10 +1,16 @@
-import { StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useLayoutEffect, useMemo } from "react";
-import { ManageExpenseScreenProp, RootStackParamList } from "src/types";
+import { StyleSheet, View } from "react-native";
+import React, {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+} from "react";
+import { Expense, RootStackParamList } from "src/types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Theme } from "src/utils/theme";
 import IconButton from "src/components/IconButton";
-import MButton from "src/components/Button";
+import { ExpenseContext } from "src/store/expenseContext";
+import ExpenseForm from "src/components/ExpenseForm";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ManageExpense">;
 
@@ -13,24 +19,40 @@ const ManageExpenses = ({ navigation, route }: Props) => {
     params: { expenseId, type },
   } = route;
 
+  const { data, deleteExpense, addExpense, editExpense } =
+    useContext(ExpenseContext);
+
   const isEditing = type === "edit";
+  const editData = isEditing && data.find(({ id }) => id === expenseId);
 
   useLayoutEffect(() => {
     const title = !isEditing ? "Add Expense" : "Edit Expense";
     navigation.setOptions({ title });
   }, [type]);
 
-  const onDelete = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
+  const onDelete = useCallback(
+    (id: string) => {
+      deleteExpense(id);
+      navigation.goBack();
+    },
+    [navigation]
+  );
 
   const onCancel = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  const onConfirm = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
+  const onConfirm = useCallback(
+    (payload: Expense) => {
+      if (isEditing) {
+        editExpense(payload.id, payload);
+      } else {
+        addExpense(payload);
+      }
+      navigation.goBack();
+    },
+    [navigation, isEditing]
+  );
 
   const deleteButton = useMemo(() => {
     if (isEditing) {
@@ -40,25 +62,23 @@ const ManageExpenses = ({ navigation, route }: Props) => {
             name="trash"
             color={Theme.colors.error500}
             size={24}
-            onPress={onDelete}
+            onPress={() => onDelete(expenseId)}
           />
         </View>
       );
     } else {
       return null;
     }
-  }, [isEditing, onDelete]);
+  }, [isEditing, onDelete, expenseId]);
 
   return (
     <View style={styles.screen}>
-      <View style={styles.buttonsContainer}>
-        <MButton onPress={onCancel} mode="flat" style={styles.button}>
-          Cancel
-        </MButton>
-        <MButton style={styles.button} onPress={onConfirm}>
-          {isEditing ? "Confirm" : "Add"}
-        </MButton>
-      </View>
+      <ExpenseForm
+        initialData={editData}
+        isEditing={isEditing}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+      />
       {deleteButton}
     </View>
   );
@@ -71,15 +91,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: Theme.colors.primary800,
-  },
-  buttonsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  button: {
-    minWidth: 120,
-    marginHorizontal: 20,
   },
   deleteContainer: {
     marginTop: 16,

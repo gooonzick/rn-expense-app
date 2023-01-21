@@ -1,14 +1,7 @@
-import {
-  FlatList,
-  ListRenderItemInfo,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import React, { useCallback } from "react";
-import { Expense, ProfileScreenNavigationProp } from "src/types";
+import { FlatList, ListRenderItemInfo, StyleSheet, View } from "react-native";
+import React from "react";
+import { Expense } from "src/types";
 import ExpenseItem from "../ExpenseItem";
-import { useNavigation } from "@react-navigation/native";
 
 type Props = {
   expenses: Expense[];

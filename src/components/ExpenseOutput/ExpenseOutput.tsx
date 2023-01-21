@@ -1,41 +1,33 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useMemo } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import ExpensesList from "../ExpensesList";
 import ExpensesSummary from "../ExpensesSummary/";
 import { Expense } from "src/types";
 import { Theme } from "src/utils/theme";
 
 type Props = {
-  // expenses: Expense[];
+  expenses: Expense[];
   period: string;
+  fallbackText?: string;
 };
 
-const DUMMY_EXPENSES: Expense[] = [
-  {
-    id: "e1",
-    description: "Eda",
-    amount: 59.99,
-    date: new Date("2021-12-19"),
-  },
-  {
-    id: "e2",
-    description: "Voda",
-    amount: 29.99,
-    date: new Date("2021-12-20"),
-  },
-  {
-    id: "e3",
-    description: "Metro",
-    amount: 9.99,
-    date: new Date("2021-12-21"),
-  },
-];
+const ExpenseOutput = ({
+  period,
+  expenses,
+  fallbackText = "No data",
+}: Props) => {
+  const content = useMemo(() => {
+    if (expenses.length === 0) {
+      return <Text style={styles.infoText}>{fallbackText}</Text>;
+    } else {
+      return <ExpensesList expenses={expenses} />;
+    }
+  }, [expenses, fallbackText]);
 
-const ExpenseOutput = ({ period }: Props) => {
   return (
     <View style={styles.container}>
-      <ExpensesSummary period={period} expenses={DUMMY_EXPENSES} />
-      <ExpensesList expenses={DUMMY_EXPENSES} />
+      <ExpensesSummary period={period} expenses={expenses} />
+      {content}
     </View>
   );
 };
@@ -47,5 +39,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: Theme.colors.primary700,
+  },
+  infoText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 32,
   },
 });

@@ -1,33 +1,10 @@
-import { createContext, useReducer } from "react";
+import { createContext, useMemo, useReducer } from "react";
 import { Expense } from "src/types";
+import { DUMMY_EXPENSES } from "./constants";
+import { ExpenseAction } from "./types";
 
-const ExpensesActionType = {
-  ADD: "add",
-  EDIT: "edit",
-  DELETE: "delete",
-} as const;
-
-type ExpenseAction =
-  | {
-      type: typeof ExpensesActionType.DELETE;
-      payload: string;
-    }
-  | {
-      type: typeof ExpensesActionType.ADD;
-      payload: Expense;
-    }
-  | {
-      type: typeof ExpensesActionType.EDIT;
-      payload: {
-        id: string;
-        item: Partial<Expense>;
-      };
-    };
-
-type ExpenseState = Expense[];
-
-const ExpenseContext = createContext({
-  data: [] as Expense[],
+export const ExpenseContext = createContext({
+  data: DUMMY_EXPENSES,
   addExpense: (payload: Expense) => {},
   deleteExpense: (id: string) => {},
   editExpense: (id: string, payload: Partial<Expense>) => {},
@@ -38,14 +15,16 @@ type Props = {
 };
 
 const expensesReducer = (
-  state: ExpenseState,
+  state: Expense[],
   action: ExpenseAction
-): ExpenseState => {
+): Expense[] => {
   switch (action.type) {
     case "add":
       const { payload: newExpense } = action;
 
-      return [...state, newExpense];
+      const newId = `e${state.length}`;
+
+      return [...state, { ...newExpense, id: newId }];
     case "edit":
       const { id, item } = action.payload;
 
@@ -67,19 +46,21 @@ const expensesReducer = (
   }
 };
 
-const ExpenseContextProvider = ({ children }: Props) => {
-  const [expensesState, dispatch] = useReducer(expensesReducer, []);
+export const ExpenseContextProvider = ({ children }: Props) => {
+  const [expensesState, dispatch] = useReducer(expensesReducer, DUMMY_EXPENSES);
+
+  const contextValue = useMemo(() => {
+    return {
+      data: expensesState,
+      addExpense: (payload: Expense) => dispatch({ type: "add", payload }),
+      deleteExpense: (payload: string) => dispatch({ type: "delete", payload }),
+      editExpense: (id: string, payload: Expense) =>
+        dispatch({ type: "edit", payload: { id, item: payload } }),
+    };
+  }, [expensesState, dispatch]);
 
   return (
-    <ExpenseContext.Provider
-      value={{
-        data: expensesState,
-        addExpense: (payload) => dispatch({ type: "add", payload }),
-        deleteExpense: (payload) => dispatch({ type: "delete", payload }),
-        editExpense: (id, payload) =>
-          dispatch({ type: "edit", payload: { id, item: payload } }),
-      }}
-    >
+    <ExpenseContext.Provider value={contextValue}>
       {children}
     </ExpenseContext.Provider>
   );
